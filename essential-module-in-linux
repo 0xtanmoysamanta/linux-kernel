@@ -3,7 +3,7 @@
 structured: this like an engineer’s handbook, not random theory.
 
 
----
+
 
 🧩 Useful Linux Kernel Modules (Real-World)
 
@@ -22,7 +22,7 @@ vfat	FAT support	USB, EFI
 💡 If you understand these, you understand Linux storage.
 
 
----
+
 
 2️⃣ Hardware & Device Driver Modules
 
@@ -39,7 +39,7 @@ nvme, ahci	SSD / SATA
 📌 These teach real driver architecture (probe, init, IRQ, DMA).
 
 
----
+
 
 3️⃣ Networking & Security Modules
 
@@ -56,7 +56,7 @@ macvlan	Container networking
 🔥 Kernel networking knowledge = elite skill.
 
 
----
+
 
 4️⃣ Observability & Performance Modules (High Value)
 
@@ -72,7 +72,7 @@ audit	Security logging
 💰 These are used by Google, Meta, Cloudflare, AWS.
 
 
----
+
 
 5️⃣ Virtualization & Containers
 
@@ -88,14 +88,14 @@ vfio	PCI passthrough
 📦 Containers exist because of these modules.
 
 
----
+
 
 🛠️ Custom Kernel Modules You Can Build (Portfolio-Safe)
 
 These are ethical, respected, and impressive.
 
 
----
+
 
 🧠 1. Process Telemetry Module
 
@@ -118,7 +118,7 @@ Notifiers
 
 
 
----
+
 
 ⚙️ 2. CPU Scheduler Observer
 
@@ -141,7 +141,7 @@ Performance analysis
 
 
 
----
+
 
 💾 3. Disk I/O Monitor Module
 
@@ -164,7 +164,7 @@ Latency analysis
 
 
 
----
+
 
 🌐 4. Network Flow Counter
 
@@ -187,7 +187,7 @@ Security telemetry
 
 
 
----
+
 
 🔐 5. Security Audit Module (Blue-Team Gold)
 
@@ -210,7 +210,7 @@ Security engineering
 
 
 
----
+
 
 🧪 6. Kernel Health Watchdog
 
@@ -233,7 +233,7 @@ Reliability engineering
 
 
 
----
+
 
 🧰 7. Device Presence Detector
 
@@ -256,7 +256,7 @@ Hardware security
 
 
 
----
+
 
 ❌ What NOT to Build (Bad for Career)
 
@@ -276,7 +276,7 @@ Have zero hiring value
 
 
 
----
+
 
 🧾 How to Frame This Publicly (Important)
 
@@ -329,5 +329,5 @@ Never say:
 This path takes you from student → serious kernel engineer.
 
 
----
+
 
