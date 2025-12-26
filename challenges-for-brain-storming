@@ -1,0 +1,912 @@
+# 🎮 Linux Kernel & Process Adventures: Gamified Learning Module
+
+## 🏆 Achievement System
+
+Track your progress as you complete challenges!
+
+```
+┌─────────────────────────────────────────┐
+│  YOUR LINUX WARRIOR STATS               │
+├─────────────────────────────────────────┤
+│  Level: [ ][ ][ ][ ][ ] (0/50)         │
+│  Title: Newbie Penguin 🐧               │
+│  XP: 0 / 1000                           │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## 🎯 QUEST 1: The Boot Treasure Hunt
+**Difficulty**: ⭐ Easy | **XP**: 100 | **Time**: 15 min
+
+### 🗺️ Mission Briefing
+The ancient boot logs contain secrets! Find the hidden treasures!
+
+### 📋 Challenges
+
+```bash
+# Create your adventure log
+mkdir ~/linux_adventures
+cd ~/linux_adventures
+echo "=== BOOT TREASURE HUNT ===" > quest1.txt
+```
+
+**Challenge 1.1: Find the Secret Boot Code** (20 XP)
+```bash
+# Your kernel has a secret version number. Find it!
+dmesg | grep "Linux version"
+
+# Record your answer
+echo "Kernel Version: YOUR_ANSWER_HERE" >> quest1.txt
+```
+
+**Challenge 1.2: Memory Detective** (20 XP)
+```bash
+# How much RAM does your system have? (in GB)
+free -h | grep "Mem:"
+
+# Bonus: Find it in /proc
+cat /proc/meminfo | grep "MemTotal"
+
+echo "Total RAM: YOUR_ANSWER_HERE" >> quest1.txt
+```
+
+**Challenge 1.3: CPU Codename** (20 XP)
+```bash
+# What's your CPU's model name?
+cat /proc/cpuinfo | grep "model name" | head -1
+
+echo "CPU Model: YOUR_ANSWER_HERE" >> quest1.txt
+```
+
+**Challenge 1.4: Boot Timer Speed Run** (20 XP)
+```bash
+# How fast did your system boot?
+systemd-analyze
+
+# What service took the longest?
+systemd-analyze blame | head -1
+
+echo "Boot Time: YOUR_ANSWER_HERE" >> quest1.txt
+echo "Slowest Service: YOUR_ANSWER_HERE" >> quest1.txt
+```
+
+**BOSS CHALLENGE 1.5: The First Process** (20 XP)
+```bash
+# Who is the ancestor of all processes?
+ps -p 1 -o comm=,pid,ppid
+
+# What's interesting about its PPID?
+echo "PID 1 Process: YOUR_ANSWER_HERE" >> quest1.txt
+echo "Its PPID: YOUR_ANSWER_HERE" >> quest1.txt
+```
+
+### 🏅 Achievement Unlocked!
+Complete all challenges to earn: **"Boot Master" Badge** 🥾
+
+---
+
+## 🎯 QUEST 2: Process Zoo Safari
+**Difficulty**: ⭐⭐ Medium | **XP**: 150 | **Time**: 20 min
+
+### 🗺️ Mission Briefing
+Explore the wild world of processes! Catch 'em all!
+
+### 🎪 The Process Zoo Setup
+
+```bash
+# Create our zoo script
+cat > ~/linux_adventures/process_zoo.sh << 'EOF'
+#!/bin/bash
+
+echo "🦁 Welcome to the Process Zoo!"
+echo "================================"
+echo ""
+
+# Create different "animals" (processes)
+echo "🐘 Creating sleeping elephant..."
+sleep 300 &
+ELEPHANT=$!
+
+echo "🐆 Creating hunting cheetah..."
+(while true; do echo -n ""; done) &
+CHEETAH=$!
+
+echo "🦥 Creating lazy sloth..."
+sleep 600 &
+SLOTH=$!
+
+echo "🐇 Creating quick rabbit..."
+sleep 60 &
+RABBIT=$!
+
+echo ""
+echo "Zoo inhabitants:"
+echo "Elephant PID: $ELEPHANT"
+echo "Cheetah PID: $CHEETAH"
+echo "Sloth PID: $SLOTH"
+echo "Rabbit PID: $RABBIT"
+echo ""
+echo "Zoo is open! Press Ctrl+C when done touring."
+
+# Wait for user interrupt
+trap 'echo ""; echo "Closing zoo..."; kill $ELEPHANT $CHEETAH $SLOTH $RABBIT 2>/dev/null; echo "All animals released!"; exit' INT
+
+wait
+EOF
+
+chmod +x ~/linux_adventures/process_zoo.sh
+```
+
+### 📋 Safari Challenges
+
+**Challenge 2.1: Animal Counter** (30 XP)
+```bash
+# Run the zoo
+~/linux_adventures/process_zoo.sh
+
+# In ANOTHER terminal, count the animals
+ps aux | grep sleep | grep -v grep | wc -l
+
+# Find the busiest animal (CPU usage)
+ps aux | grep -E "sleep|process_zoo" | sort -k3 -rn
+
+# Answer: Which animal uses most CPU?
+```
+
+**Challenge 2.2: Family Tree Explorer** (30 XP)
+```bash
+# With zoo running, find the parent of all animals
+ZOO_PID=$(pgrep -f process_zoo.sh)
+echo "Zoo keeper PID: $ZOO_PID"
+
+# Show the family tree
+pstree -p $ZOO_PID
+
+# How many children does the zoo keeper have?
+ps --ppid $ZOO_PID | wc -l
+```
+
+**Challenge 2.3: State Detective** (30 XP)
+```bash
+# What state is each animal in?
+ps -o pid,state,comm | grep sleep
+
+# Capture a screenshot of the output
+# S = Sleeping, R = Running, Z = Zombie
+```
+
+**Challenge 2.4: The Freeze Game** (30 XP)
+```bash
+# Freeze the elephant!
+kill -STOP <ELEPHANT_PID>
+
+# Check its state (should be 'T')
+ps -o pid,state,comm -p <ELEPHANT_PID>
+
+# Wake it up!
+kill -CONT <ELEPHANT_PID>
+
+# Verify it's back to 'S'
+ps -o pid,state,comm -p <ELEPHANT_PID>
+```
+
+**BOSS CHALLENGE 2.5: Zoo Cleanup** (30 XP)
+```bash
+# Close the zoo gracefully using the keeper's PID
+kill <ZOO_PID>
+
+# Verify all animals are gone
+ps aux | grep -E "sleep 300|sleep 600" | grep -v grep
+
+# If any zombies remain, explain why!
+```
+
+### 🏅 Achievement Unlocked!
+Complete all challenges to earn: **"Process Wrangler" Badge** 🤠
+
+---
+
+## 🎯 QUEST 3: The /proc Mystery Mansion
+**Difficulty**: ⭐⭐ Medium | **XP**: 200 | **Time**: 25 min
+
+### 🗺️ Mission Briefing
+The `/proc` filesystem is a haunted mansion full of secrets. Each room reveals runtime mysteries!
+
+### 🏚️ Room Exploration
+
+**Room 1: The Mirror Chamber** (40 XP)
+```bash
+# Find yourself in the mirror
+echo "My current PID: $$"
+
+# Enter your own process room
+cd /proc/$$
+
+# What's in your room?
+ls -la
+
+# Read your status scroll
+cat status | grep "Name:\|Pid:\|PPid:\|State:"
+
+# CHALLENGE: What is your process name?
+```
+
+**Room 2: The Command Library** (40 XP)
+```bash
+# What spell summoned you?
+cat /proc/$$/cmdline
+echo ""
+
+# Make it readable
+cat /proc/$$/cmdline | tr '\0' ' '
+echo ""
+
+# CHALLENGE: What's the full command that started your shell?
+```
+
+**Room 3: The Memory Map Gallery** (40 XP)
+```bash
+# Where do you exist in memory?
+cat /proc/$$/maps | head -20
+
+# Count your memory regions
+cat /proc/$$/maps | wc -l
+
+# CHALLENGE: How many memory regions does your process have?
+```
+
+**Room 4: The File Descriptor Hall** (40 XP)
+```bash
+# What portals are open?
+ls -l /proc/$$/fd
+
+# Standard portals (0=stdin, 1=stdout, 2=stderr)
+# CHALLENGE: Where does your stdout point to?
+readlink /proc/$$/fd/1
+```
+
+**BOSS CHALLENGE: The System Oracle** (40 XP)
+```bash
+# Create a system information spell
+cat > ~/linux_adventures/system_oracle.sh << 'EOF'
+#!/bin/bash
+
+echo "🔮 THE SYSTEM ORACLE SPEAKS 🔮"
+echo "================================"
+echo ""
+
+echo "📊 CPU Prophecy:"
+cat /proc/cpuinfo | grep "model name" | head -1 | cut -d: -f2
+
+echo ""
+echo "🧠 Memory Wisdom:"
+cat /proc/meminfo | grep -E "MemTotal|MemAvailable" | awk '{print $1, $2/1024/1024 "GB"}'
+
+echo ""
+echo "⏰ Time Since Awakening:"
+uptime_seconds=$(cat /proc/uptime | cut -d' ' -f1)
+echo "The system has been awake for $uptime_seconds seconds"
+
+echo ""
+echo "📈 Current Load (1/5/15 min):"
+cat /proc/loadavg | awk '{print $1, $2, $3}'
+
+echo ""
+echo "🔢 Total Processes:"
+ls /proc | grep -E "^[0-9]+$" | wc -l
+
+echo ""
+echo "🎯 Your Current Quest:"
+echo "PID: $$"
+echo "Parent: $PPID"
+echo "State: $(cat /proc/$$/status | grep State | awk '{print $2}')"
+
+echo ""
+echo "The oracle has spoken! ✨"
+EOF
+
+chmod +x ~/linux_adventures/system_oracle.sh
+~/linux_adventures/system_oracle.sh
+```
+
+### 🏅 Achievement Unlocked!
+Complete all challenges to earn: **"/proc Explorer" Badge** 🗺️
+
+---
+
+## 🎯 QUEST 4: The Signal Wars
+**Difficulty**: ⭐⭐⭐ Hard | **XP**: 250 | **Time**: 30 min
+
+### 🗺️ Mission Briefing
+Master the ancient art of process signaling! Command your processes with mystical signals!
+
+### ⚔️ Battle Arena Setup
+
+```bash
+cat > ~/linux_adventures/signal_warrior.sh << 'EOF'
+#!/bin/bash
+
+# Training dummy process
+cat > ~/linux_adventures/training_dummy.sh << 'INNER'
+#!/bin/bash
+
+# Trap signals
+trap 'echo "💥 Ouch! Received SIGTERM!"; sleep 1; exit' TERM
+trap 'echo "🛑 Stunned! Received SIGINT!"' INT
+trap 'echo "⏸️  Frozen! Received SIGSTOP!"' STOP
+trap 'echo "▶️  Unfrozen! Received SIGCONT!"' CONT
+trap 'echo "💀 Instant death! SIGKILL cannot be trapped!"' KILL
+
+echo "🎯 Training Dummy activated! PID: $$"
+echo "Try different signals on me!"
+echo "Use: kill -SIGNAL $$"
+echo ""
+
+# Count to 100
+for i in {1..100}; do
+    echo "Count: $i"
+    sleep 2
+done
+
+echo "Training complete!"
+INNER
+
+chmod +x ~/linux_adventures/training_dummy.sh
+EOF
+
+chmod +x ~/linux_adventures/signal_warrior.sh
+bash ~/linux_adventures/signal_warrior.sh
+```
+
+### ⚔️ Battle Challenges
+
+**Challenge 4.1: The Polite Knock (SIGTERM)** (50 XP)
+```bash
+# Start the dummy
+~/linux_adventures/training_dummy.sh &
+DUMMY_PID=$!
+
+# Wait 5 seconds, then send SIGTERM
+sleep 5
+kill -TERM $DUMMY_PID
+
+# Observe the message
+# CHALLENGE: Did the process clean up gracefully?
+```
+
+**Challenge 4.2: The Interrupt Attack (SIGINT)** (50 XP)
+```bash
+# Start dummy again
+~/linux_adventures/training_dummy.sh &
+DUMMY_PID=$!
+
+# Try Ctrl+C equivalent
+kill -INT $DUMMY_PID
+
+# CHALLENGE: Did the process exit or just pause?
+# Clean up
+kill -9 $DUMMY_PID 2>/dev/null
+```
+
+**Challenge 4.3: The Freeze Ray (SIGSTOP/SIGCONT)** (50 XP)
+```bash
+# Start dummy
+~/linux_adventures/training_dummy.sh &
+DUMMY_PID=$!
+
+# Freeze it!
+kill -STOP $DUMMY_PID
+
+# Check state (should be 'T')
+ps -o pid,state,comm -p $DUMMY_PID
+
+# Wait 5 seconds
+sleep 5
+
+# Unfreeze it!
+kill -CONT $DUMMY_PID
+
+# CHALLENGE: Did counting resume from where it stopped?
+kill -9 $DUMMY_PID 2>/dev/null
+```
+
+**Challenge 4.4: The Instant Kill (SIGKILL)** (50 XP)
+```bash
+# Start dummy
+~/linux_adventures/training_dummy.sh &
+DUMMY_PID=$!
+
+# The ultimate weapon - cannot be blocked!
+kill -9 $DUMMY_PID
+
+# CHALLENGE: Did the process have time to print anything?
+```
+
+**BOSS CHALLENGE 4.5: Signal Master Combo** (50 XP)
+```bash
+# Create a signal testing arena
+cat > ~/linux_adventures/signal_test.sh << 'EOF'
+#!/bin/bash
+
+echo "🥋 SIGNAL DOJO 🥋"
+echo "================"
+
+# Create multiple processes
+sleep 100 & PID1=$!
+sleep 200 & PID2=$!
+sleep 300 & PID3=$!
+
+echo "Students enrolled:"
+echo "Student 1 (PID: $PID1) - Beginner"
+echo "Student 2 (PID: $PID2) - Intermediate"
+echo "Student 3 (PID: $PID3) - Advanced"
+echo ""
+
+echo "Your mission:"
+echo "1. Freeze Student 1"
+echo "2. Politely dismiss Student 2"
+echo "3. Forcefully remove Student 3"
+echo ""
+echo "Complete within 30 seconds!"
+echo "Press Enter when ready..."
+read
+
+# Start timer
+START_TIME=$SECONDS
+
+# Check results after 30 seconds
+sleep 30
+
+echo ""
+echo "Time's up! Checking results..."
+
+# Check states
+for PID in $PID1 $PID2 $PID3; do
+    if ps -p $PID > /dev/null 2>&1; then
+        STATE=$(ps -o state= -p $PID)
+        echo "PID $PID: Still alive (State: $STATE)"
+    else
+        echo "PID $PID: Properly dismissed ✓"
+    fi
+done
+
+# Clean up
+kill -9 $PID1 $PID2 $PID3 2>/dev/null
+
+echo ""
+ELAPSED=$((SECONDS - START_TIME))
+echo "Completed in: ${ELAPSED}s"
+EOF
+
+chmod +x ~/linux_adventures/signal_test.sh
+~/linux_adventures/signal_test.sh
+```
+
+### 🏅 Achievement Unlocked!
+Complete all challenges to earn: **"Signal Sensei" Badge** 🥋
+
+---
+
+## 🎯 QUEST 5: The Priority Palace
+**Difficulty**: ⭐⭐⭐ Hard | **XP**: 300 | **Time**: 30 min
+
+### 🗺️ Mission Briefing
+In the Priority Palace, processes compete for the CPU's attention. Master the art of niceness!
+
+### 👑 Royal Court Setup
+
+```bash
+cat > ~/linux_adventures/priority_court.sh << 'EOF'
+#!/bin/bash
+
+echo "👑 WELCOME TO THE PRIORITY PALACE 👑"
+echo "===================================="
+echo ""
+
+# Create nobles of different ranks
+echo "Summoning the royal court..."
+
+# The lazy noble (nice = 19, lowest priority)
+nice -n 19 bash -c 'echo "🛌 Lazy Lord spawned (PID: $$, Nice: 19)"; sleep 200' &
+LAZY=$!
+
+# The common noble (nice = 0, default)
+nice -n 0 bash -c 'echo "🧍 Common Count spawned (PID: $$, Nice: 0)"; sleep 200' &
+COMMON=$!
+
+# Try high priority (needs sudo, will fail for normal users)
+nice -n -10 bash -c 'echo "⚡ Urgent Duke spawned (PID: $$, Nice: -10)"; sleep 200' &
+URGENT=$!
+
+echo ""
+echo "Court assembled! PIDs: $LAZY, $COMMON, $URGENT"
+echo ""
+echo "View the hierarchy with:"
+echo "ps -o pid,ni,comm -p $LAZY,$COMMON,$URGENT"
+
+# Keep script alive
+trap "echo 'Dismissing court...'; kill $LAZY $COMMON $URGENT 2>/dev/null; exit" INT
+wait
+EOF
+
+chmod +x ~/linux_adventures/priority_court.sh
+```
+
+### 👑 Palace Challenges
+
+**Challenge 5.1: The Nice Scale** (60 XP)
+```bash
+# Start the court
+~/linux_adventures/priority_court.sh &
+COURT_PID=$!
+
+# View the hierarchy
+ps -o pid,ni,comm --ppid $COURT_PID
+
+# CHALLENGE: Which nice values did you see?
+# Record them!
+
+# Clean up
+kill $COURT_PID
+```
+
+**Challenge 5.2: The Promotion Game** (60 XP)
+```bash
+# Create a peasant process
+sleep 500 &
+PEASANT=$!
+
+echo "Peasant PID: $PEASANT"
+
+# Check current status
+ps -o pid,ni,comm -p $PEASANT
+
+# Promote the peasant (make less nice)
+renice -5 $PEASANT
+
+# Verify promotion
+ps -o pid,ni,comm -p $PEASANT
+
+# Demote back
+renice 10 $PEASANT
+
+# CHALLENGE: What was the final nice value?
+
+kill $PEASANT
+```
+
+**Challenge 5.3: CPU Race** (60 XP)
+```bash
+# Create CPU race script
+cat > ~/linux_adventures/cpu_race.sh << 'INNER'
+#!/bin/bash
+
+echo "🏁 CPU RACE STARTING! 🏁"
+echo "======================="
+
+# Racer 1: High priority (low nice)
+nice -n -5 bash -c '
+    COUNTER=0
+    END=$((SECONDS + 10))
+    while [ $SECONDS -lt $END ]; do
+        ((COUNTER++))
+    done
+    echo "🏎️  Fast Racer counted to: $COUNTER"
+' 2>/dev/null &
+FAST=$!
+
+# Racer 2: Low priority (high nice)
+nice -n 19 bash -c '
+    COUNTER=0
+    END=$((SECONDS + 10))
+    while [ $SECONDS -lt $END ]; do
+        ((COUNTER++))
+    done
+    echo "🐌 Slow Racer counted to: $COUNTER"
+' &
+SLOW=$!
+
+echo "Racers: Fast ($FAST) vs Slow ($SLOW)"
+echo "Racing for 10 seconds..."
+echo ""
+
+# Monitor during race
+for i in {1..5}; do
+    sleep 2
+    ps -o pid,ni,%cpu,comm -p $FAST,$SLOW
+done
+
+wait
+
+echo ""
+echo "Race complete! Who counted higher?"
+INNER
+
+chmod +x ~/linux_adventures/cpu_race.sh
+~/linux_adventures/cpu_race.sh
+```
+
+**Challenge 5.4: The Renice Challenge** (60 XP)
+```bash
+# Start multiple processes with different priorities
+for N in 10 5 0 -5; do
+    nice -n $N sleep 600 &
+done
+
+# List all with their nice values
+ps -eo pid,ni,comm | grep sleep
+
+# CHALLENGE: Adjust ALL sleep processes to nice value 0
+# Use a loop!
+for PID in $(pgrep sleep); do
+    renice 0 $PID
+done
+
+# Verify
+ps -eo pid,ni,comm | grep sleep
+
+# Cleanup
+killall sleep
+```
+
+**BOSS CHALLENGE 5.5: Priority Manager Simulator** (60 XP)
+```bash
+cat > ~/linux_adventures/priority_manager.sh << 'EOF'
+#!/bin/bash
+
+echo "🎮 PRIORITY MANAGER SIMULATOR 🎮"
+echo "================================"
+echo ""
+
+# Create various processes
+declare -a PIDS
+declare -a NAMES
+
+create_process() {
+    local name=$1
+    local nice=$2
+    nice -n $nice sleep 300 &
+    PIDS+=($!)
+    NAMES+=("$name")
+}
+
+echo "Creating processes..."
+create_process "WebServer" 0
+create_process "Database" -5
+create_process "Backup" 15
+create_process "Monitor" 10
+
+echo ""
+echo "Current Process Status:"
+printf "%-15s %-10s %-10s\n" "NAME" "PID" "NICE"
+echo "----------------------------------------"
+
+for i in "${!PIDS[@]}"; do
+    NICE=$(ps -o ni= -p ${PIDS[$i]})
+    printf "%-15s %-10s %-10s\n" "${NAMES[$i]}" "${PIDS[$i]}" "$NICE"
+done
+
+echo ""
+echo "Your tasks:"
+echo "1. Make Backup even lower priority (nice +19)"
+echo "2. Give Monitor slightly higher priority (nice 5)"
+echo "3. Keep WebServer at default"
+echo ""
+echo "Commands available:"
+echo "  renice <value> <PID>"
+echo "  ps -o pid,ni,comm -p <PID>"
+echo ""
+echo "Press Enter when done to check results..."
+read
+
+echo ""
+echo "Checking your work..."
+
+# Check if backup is 19
+BACKUP_NICE=$(ps -o ni= -p ${PIDS[2]})
+if [ "$BACKUP_NICE" -eq 19 ]; then
+    echo "✅ Backup priority: CORRECT"
+else
+    echo "❌ Backup priority: INCORRECT (expected 19, got $BACKUP_NICE)"
+fi
+
+# Check if monitor is 5
+MONITOR_NICE=$(ps -o ni= -p ${PIDS[3]})
+if [ "$MONITOR_NICE" -eq 5 ]; then
+    echo "✅ Monitor priority: CORRECT"
+else
+    echo "❌ Monitor priority: INCORRECT (expected 5, got $MONITOR_NICE)"
+fi
+
+# Cleanup
+for PID in "${PIDS[@]}"; do
+    kill $PID 2>/dev/null
+done
+
+echo ""
+echo "Simulation complete!"
+EOF
+
+chmod +x ~/linux_adventures/priority_manager.sh
+~/linux_adventures/priority_manager.sh
+```
+
+### 🏅 Achievement Unlocked!
+Complete all challenges to earn: **"Priority Prince/Princess" Badge** 👑
+
+---
+
+## 🎯 QUEST 6: The Zombie Apocalypse
+**Difficulty**: ⭐⭐⭐⭐ Very Hard | **XP**: 400 | **Time**: 40 min
+
+### 🗺️ Mission Briefing
+Zombies are harmless... but understanding them makes you a master! Learn the dark art of zombie creation and hunting.
+
+### 🧟 Zombie Lab Setup
+
+```bash
+mkdir -p ~/linux_adventures/zombie_lab
+cd ~/linux_adventures/zombie_lab
+
+cat > zombie_maker.c << 'EOF'
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+int main() {
+    printf("🧪 ZOMBIE LABORATORY 🧪\n");
+    printf("=====================\n\n");
+    
+    int zombie_count = 3;
+    
+    for (int i = 0; i < zombie_count; i++) {
+        pid_t pid = fork();
+        
+        if (pid > 0) {
+            // Parent
+            printf("Created zombie #%d (PID: %d)\n", i+1, pid);
+        } else if (pid == 0) {
+            // Child - die immediately
+            printf("  Child %d dying...\n", i+1);
+            exit(0);
+        }
+    }
+    
+    printf("\nZombies created! They will persist for 30 seconds.\n");
+    printf("Quick! In another terminal:\n");
+    printf("  ps aux | grep defunct\n");
+    printf("  ps -eo pid,stat,comm | grep Z\n");
+    printf("\nParent PID: %d\n", getpid());
+    
+    // Parent sleeps, not reaping children
+    sleep(30);
+    
+    printf("\nReaping zombies now...\n");
+    // Reap the zombies
+    for (int i = 0; i < zombie_count; i++) {
+        wait(NULL);
+        printf("Zombie #%d reaped\n", i+1);
+    }
+    
+    printf("\nAll zombies eliminated!\n");
+    return 0;
+}
+EOF
+
+# Compile
+gcc zombie_maker.c -o zombie_maker 2>/dev/null || echo "Note: gcc needed for this challenge"
+```
+
+### 🧟 Zombie Challenges
+
+**Challenge 6.1: Zombie Spotter** (80 XP)
+```bash
+# Terminal 1: Run zombie maker
+~/linux_adventures/zombie_lab/zombie_maker
+
+# Terminal 2: Hunt the zombies!
+# Find them quickly before they're reaped!
+ps aux | grep defunct
+
+# Alternative method
+ps -eo pid,stat,comm | grep '^.* Z'
+
+# CHALLENGE: How many zombies did you find?
+# What's their state letter?
+```
+
+**Challenge 6.2: Zombie Genealogy** (80 XP)
+```bash
+# While zombies exist, find their parent
+ps -eo pid,ppid,stat,comm | grep defunct
+
+# View the family tree
+PARENT_PID=$(ps -eo ppid,stat | grep Z | head -1 | awk '{print $1}')
+pstree -p $PARENT_PID
+
+# CHALLENGE: What happens to zombies when parent dies?
+```
+
+**Challenge 6.3: Shell Zombie Creator** (80 XP)
+```bash
+# Create zombies without C!
+cat > ~/linux_adventures/zombie_lab/shell_zombies.sh << 'EOF'
+#!/bin/bash
+
+echo "🧟 Creating shell zombies..."
+
+# Method 1: Subshell that exits immediately
+(exit) &
+ZOMBIE1=$!
+
+# Method 2: Background job that finishes
+sleep 0.1 &
+ZOMBIE2=$!
+
+echo "Potential zombies created: $ZOMBIE1, $ZOMBIE2"
+echo "Parent PID: $$"
+echo ""
+echo "Check for zombies now:"
+echo "  ps -eo pid,ppid,stat,comm | grep $$"
+
+# Keep parent alive
+sleep 15
+
+echo ""
+echo "Reaping..."
+wait
+echo "All clean!"
+EOF
+
+chmod +x ~/linux_adventures/zombie_lab/shell_zombies.sh
+~/linux_adventures/zombie_lab/shell_zombies.sh
+```
+
+**Challenge 6.4: Zombie Prevent Defender** (80 XP)
+```bash
+# The RIGHT way - parent that properly reaps children
+cat > ~/linux_adventures/zombie_lab/good_parent.sh << 'EOF'
+#!/bin/bash
+
+echo "✅ RESPONSIBLE PARENT DEMO"
+echo "=========================="
+
+# Set up signal handler to reap children
+trap 'wait; echo "Child reaped!"' CHLD
+
+echo "Creating child processes..."
+for i in {1..5}; do
+    (
+        echo "Child $i (PID: $$) working..."
+        sleep $((RANDOM % 3 + 1))
+        echo "Child $i done"
+    ) &
+done
+
+echo ""
+echo "Parent (PID: $$) waiting for children..."
+echo "No zombies will be created!"
+echo ""
+
+# Check for zombies (should be none)
+sleep 2
+ZOMBIES=$(ps -eo stat | grep -c Z)
+echo "Zombie count: $ZOMBIES"
+
+wait
+echo ""
+echo "All children properly reaped! ✨"
+EOF
+
+chmod +x ~/linux_adventures/zombie_lab/good_parent.sh
+~/linux_adventures/zombie_lab/good_parent.sh
+```
+
+**BOSS CHALLENGE 6.5: Zombie Hunter Game** (80 XP)
+```bash
+cat > ~/linux_adventures/zombie_lab/zombie_hunter.sh << 'EOF'
+#!/bin/bash
+
+echo "🎮 ZOMBIE HUNTE
